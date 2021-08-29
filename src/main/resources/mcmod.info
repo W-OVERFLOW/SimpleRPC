@@ -1,14 +1,14 @@
 [
   {
-    "modid": "forgetemplate",
-    "name": "ForgeTemplate",
-    "description": "An example template",
+    "modid": "simplerpc",
+    "name": "SimpleRPC",
+    "description": "",
     "version": "${version}",
     "mcversion": "${mcversion}",
     "url": "",
     "updateUrl": "",
     "authorList": [
-      ""
+      "W-OVERFLOW"
     ],
     "credits": "",
     "logoFile": "",

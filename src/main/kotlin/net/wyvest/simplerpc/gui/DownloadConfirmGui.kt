@@ -1,4 +1,4 @@
-package net.wyvest.template.gui
+package net.wyvest.simplerpc.gui
 
 import gg.essential.api.EssentialAPI
 import gg.essential.api.utils.Multithreading
@@ -7,10 +7,10 @@ import net.minecraft.client.gui.GuiMainMenu
 import net.minecraft.client.gui.GuiScreen
 import net.minecraft.client.renderer.GlStateManager
 import net.minecraft.util.EnumChatFormatting
-import net.wyvest.template.ForgeTemplate
-import net.wyvest.template.utils.Updater
-import net.wyvest.template.utils.Updater.shouldUpdate
-import net.wyvest.template.utils.Updater.updateUrl
+import net.wyvest.simplerpc.SimpleRPC
+import net.wyvest.simplerpc.utils.Updater
+import net.wyvest.simplerpc.utils.Updater.shouldUpdate
+import net.wyvest.simplerpc.utils.Updater.updateUrl
 import java.io.File
 import kotlin.math.max
 
@@ -29,19 +29,19 @@ class DownloadConfirmGui(private val parent: GuiScreen?) : GuiScreen() {
                 Multithreading.runAsync {
                     if (Updater.download(
                             updateUrl,
-                            File("mods/${ForgeTemplate.NAME}-${Updater.latestTag.substringAfter("v")}.jar")
+                            File("mods/${SimpleRPC.NAME}-${Updater.latestTag.substringAfter("v")}.jar")
                         ) && Updater.download(
                             "https://github.com/Wyvest/Deleter/releases/download/v1.2/Deleter-1.2.jar",
                             File("config/Wyvest/Deleter-1.2.jar")
                         )
                     ) {
                         EssentialAPI.getNotifications()
-                            .push(ForgeTemplate.NAME, "The ingame updater has successfully installed the newest version.")
+                            .push(SimpleRPC.NAME, "The ingame updater has successfully installed the newest version.")
                         Updater.addShutdownHook()
                         shouldUpdate = false
                     } else {
                         EssentialAPI.getNotifications().push(
-                            ForgeTemplate.NAME,
+                            SimpleRPC.NAME,
                             "The ingame updater has NOT installed the newest version as something went wrong."
                         )
                     }
@@ -63,7 +63,7 @@ class DownloadConfirmGui(private val parent: GuiScreen?) : GuiScreen() {
         GlStateManager.scale(2f, 2f, 0f)
         drawCenteredString(
             fontRendererObj,
-            EnumChatFormatting.DARK_PURPLE.toString() + ForgeTemplate.NAME,
+            EnumChatFormatting.DARK_PURPLE.toString() + SimpleRPC.NAME,
             width / 4,
             3,
             -1
@@ -74,7 +74,7 @@ class DownloadConfirmGui(private val parent: GuiScreen?) : GuiScreen() {
         val lines = listOf(
             "Are you sure you want to update?",
             "You can download it ingame at any time via the configuration screen.",
-            "(This will update from v${ForgeTemplate.VERSION} to ${Updater.latestTag})"
+            "(This will update from v${SimpleRPC.VERSION} to ${Updater.latestTag})"
         )
         var offset = max(85 - lines.size * 10, 10)
 

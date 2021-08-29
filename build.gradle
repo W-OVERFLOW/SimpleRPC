@@ -2,12 +2,12 @@ plugins {
     id "java"
     id "com.github.johnrengelman.shadow" version "6.1.0"
     id "net.minecraftforge.gradle.forge" version "86b2392"
-    id "org.jetbrains.kotlin.jvm" version "1.5.21"
+    id "org.jetbrains.kotlin.jvm" version "1.5.30"
 }
 
-version = "1.0.0"
+version = "0.2.0"
 group = "net.wyvest"
-archivesBaseName = "ForgeTemplate"
+archivesBaseName = "SimpleRPC"
 
 sourceCompatibility = targetCompatibility = 1.8
 compileJava.options.encoding = "UTF-8"
@@ -17,8 +17,8 @@ minecraft {
     runDir = "run"
     mappings = "stable_22"
     makeObfSourceJar = false
-    clientJvmArgs += '-Dfml.coreMods.load=net.wyvest.template.tweaker.TemplateLoadingPlugin'
-    clientRunArgs += '--tweakClass net.wyvest.template.tweaker.RequisiteEssentialTweaker'
+    clientJvmArgs += '-Dfml.coreMods.load=net.wyvest.simplerpc.tweaker.SimpleRPCLoadingPlugin'
+    clientRunArgs += '--tweakClass net.wyvest.requisiteessentialloader.RequisiteEssentialTweaker'
 }
 
 configurations {
@@ -32,31 +32,29 @@ repositories {
     maven { url 'https://repo.sk1er.club/repository/maven-releases/' }
     maven { url 'https://jitpack.io/' }
     maven { url 'https://repo.spongepowered.org/repository/maven-public/' }
-    maven {
-        url 'http://maven.matthewtgm.xyz/repository/maven-public/'
-        allowInsecureProtocol = true
-    }
 }
 
 dependencies {
     // Libraries
     provided 'xyz.matthewtgm:Requisite:1.1.1'
-    include('xyz.matthewtgm:RequisiteLaunchwrapper:1.1') {
-        transitive = false
-    }
-    include('gg.essential:loader-launchwrapper:1.1.0') {
-        transitive = false
-    }
+    include 'com.github.W-OVERFLOW:RequisiteEssentialLoader:7a4eb4eeb7'
+    implementation ('xyz.matthewtgm:RequisiteLaunchwrapper:1.1')
+    implementation ('gg.essential:loader-launchwrapper:1.1.0')
     provided 'gg.essential:essential-1.8.9-forge:1300'
+    include ('com.github.cbyrneee:KDiscordIPC:d589e4235b') {
+        transitive = false
+    }
+    include('com.google.code.gson:gson:2.8.8')
+    include('com.kohlschutter.junixsocket:junixsocket-core:2.4.0')
 }
 
 jar {
     manifest.attributes(
             'ModSide': 'CLIENT',
-            'FMLCorePlugin': 'net.wyvest.template.tweaker.TemplateLoadingPlugin',
+            'FMLCorePlugin': 'net.wyvest.simplerpc.tweaker.SimpleRPCLoadingPlugin',
             'FMLCorePluginContainsFMLMod': true,
             'ForceLoadAsMod': true,
-            'TweakClass': 'net.wyvest.template.tweaker.RequisiteEssentialTweaker',
+            'TweakClass': 'net.wyvest.requisiteessentialloader.RequisiteEssentialTweaker',
             'TweakOrder': '0'
     )
 
@@ -85,29 +83,13 @@ processResources {
     }
 }
 
-/**
- * This task simply moves resources so they can be accessed at runtime, Forge is quite weird isn"t it
- */
-task moveResources {
-    doLast {
-        ant.move file: "${buildDir}/resources/main",
-            todir: "${buildDir}/classes/java"
-    }
-}
-
-moveResources.dependsOn processResources
-classes.dependsOn moveResources
-
-// This forces the build task to run shadowJar after
-tasks.reobfJar.dependsOn(tasks.shadowJar)
-
 // This adds support to ("embed", "shade", "include") libraries into our JAR
 shadowJar {
     archiveClassifier.set("")
     configurations = [project.configurations.include]
-    duplicatesStrategy DuplicatesStrategy.EXCLUDE
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 
-
+    relocate("com.google", "kdiscordipc.google")
     exclude 'LICENSE.md'
     exclude 'pack.mcmeta'
     exclude 'dummyThing'
@@ -129,13 +111,18 @@ shadowJar {
     exclude 'fabric.mod.json'
 }
 
+// This forces the build task to run shadowJar after
+tasks.reobfJar.dependsOn(tasks.shadowJar)
+
 compileKotlin {
     kotlinOptions {
         jvmTarget = "1.8"
+        freeCompilerArgs += "-Xopt-in=kotlin.RequiresOptIn"
     }
 }
 compileTestKotlin {
     kotlinOptions {
         jvmTarget = "1.8"
+        freeCompilerArgs += "-Xopt-in=kotlin.RequiresOptIn"
     }
 }

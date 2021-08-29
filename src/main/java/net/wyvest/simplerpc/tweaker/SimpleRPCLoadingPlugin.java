@@ -1,4 +1,4 @@
-package net.wyvest.template.tweaker;
+package net.wyvest.simplerpc.tweaker;
 
 import kotlin.KotlinVersion;
 import net.minecraftforge.fml.relauncher.IFMLLoadingPlugin;
@@ -10,16 +10,15 @@ import java.awt.event.MouseEvent;
 import java.io.File;
 import java.lang.reflect.Method;
 import java.net.URI;
-import java.net.URL;
 import java.util.Map;
 
 /**
  * Adapted from Skytils under AGPLv3
  * https://github.com/Skytils/SkytilsMod/blob/1.x/LICENSE.md
  */
-public class TemplateLoadingPlugin implements IFMLLoadingPlugin {
+public class SimpleRPCLoadingPlugin implements IFMLLoadingPlugin {
 
-    public TemplateLoadingPlugin() {
+    public SimpleRPCLoadingPlugin() {
         if (!KotlinVersion.CURRENT.isAtLeast(1, 5, 0)) {
             showMessage(new File(new File(KotlinVersion.class.getProtectionDomain().getCodeSource().getLocation().toString()).getParentFile().getParentFile().getName()));
         }
@@ -76,16 +75,6 @@ public class TemplateLoadingPlugin implements IFMLLoadingPlugin {
             }
         });
 
-        Icon icon = null;
-        try {
-            URL url = TemplateLoadingPlugin.class.getResource("/assets/template/wyvest.png");
-            if (url != null) {
-                icon = new ImageIcon(Toolkit.getDefaultToolkit().createImage(url).getScaledInstance(50, 50, Image.SCALE_DEFAULT));
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
         JButton close = new JButton("Close");
         close.addMouseListener(new MouseAdapter() {
             @Override
@@ -101,7 +90,7 @@ public class TemplateLoadingPlugin implements IFMLLoadingPlugin {
                 "Template Error",
                 JOptionPane.DEFAULT_OPTION,
                 JOptionPane.ERROR_MESSAGE,
-                icon,
+                null,
                 options,
                 options[0]
         );

@@ -1,4 +1,4 @@
-package net.wyvest.template.utils
+package net.wyvest.simplerpc.utils
 
 import gg.essential.api.EssentialAPI
 import kotlinx.coroutines.CoroutineName
@@ -7,9 +7,10 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import net.minecraft.util.Util
 import net.minecraftforge.fml.common.versioning.DefaultArtifactVersion
-import net.wyvest.template.ForgeTemplate
-import net.wyvest.template.ForgeTemplate.mc
-import net.wyvest.template.gui.DownloadConfirmGui
+import net.wyvest.simplerpc.SimpleRPC
+import net.wyvest.simplerpc.SimpleRPC.mc
+import net.wyvest.simplerpc.config.RPCConfig
+import net.wyvest.simplerpc.gui.DownloadConfirmGui
 import org.apache.http.HttpResponse
 import org.apache.http.client.HttpClient
 import org.apache.http.client.config.RequestConfig
@@ -31,24 +32,26 @@ object Updater {
      * https://github.com/My-Name-Is-Jeff/SimpleToggleSprint/blob/1.8.9/LICENSE
      */
     fun update() {
-        CoroutineScope(Dispatchers.IO + CoroutineName("${ForgeTemplate.NAME}-UpdateChecker")).launch {
+        CoroutineScope(Dispatchers.IO + CoroutineName("${SimpleRPC.NAME}-UpdateChecker")).launch {
             val latestRelease =
-                APIUtil.getJSONResponse("https://api.github.com/repos/Wyvest/${ForgeTemplate.ID}/releases/latest")
+                APIUtil.getJSONResponse("https://api.github.com/repos/W-OVERFLOW/${SimpleRPC.ID}/releases/latest")
             latestTag = latestRelease.get("tag_name").asString
 
-            val currentVersion = DefaultArtifactVersion(ForgeTemplate.VERSION.substringBefore("-"))
+            val currentVersion = DefaultArtifactVersion(SimpleRPC.VERSION.substringBefore("-"))
             val latestVersion = DefaultArtifactVersion(latestTag.substringAfter("v").substringBefore("-"))
 
-            if ((ForgeTemplate.VERSION.contains("BETA") && currentVersion >= latestVersion)) {
+            if ((SimpleRPC.VERSION.contains("BETA") && currentVersion >= latestVersion)) {
                 return@launch
             } else if (currentVersion < latestVersion) {
                 updateUrl = latestRelease["assets"].asJsonArray[0].asJsonObject["browser_download_url"].asString
             }
             if (updateUrl.isNotEmpty()) {
-                EssentialAPI.getNotifications()
-                    .push("Mod Update", "${ForgeTemplate.NAME} $latestTag is available!\nClick here to download it!", 5f) {
-                        EssentialAPI.getGuiUtil().openScreen(DownloadConfirmGui(mc.currentScreen))
-                    }
+                if (RPCConfig.showUpdateNotification) {
+                    EssentialAPI.getNotifications()
+                        .push("Mod Update", "${SimpleRPC.NAME} $latestTag is available!\nClick here to download it!", 5f) {
+                            EssentialAPI.getGuiUtil().openScreen(DownloadConfirmGui(mc.currentScreen))
+                        }
+                }
                 shouldUpdate = true
             }
         }
@@ -87,18 +90,18 @@ object Updater {
      */
     fun addShutdownHook() {
         EssentialAPI.getShutdownHookUtil().register(Thread {
-            println("Deleting old ${ForgeTemplate.NAME} jar file...")
+            println("Deleting old ${SimpleRPC.NAME} jar file...")
             try {
                 val runtime = getJavaRuntime()
                 if (Util.getOSType() == Util.EnumOS.OSX) {
                     println("On Mac, trying to open mods folder")
-                    Desktop.getDesktop().open(ForgeTemplate.jarFile.parentFile)
+                    Desktop.getDesktop().open(SimpleRPC.jarFile.parentFile)
                 }
                 println("Using runtime $runtime")
                 val file = File("config/Wyvest/Deleter-1.2.jar")
-                println("\"$runtime\" -jar \"${file.absolutePath}\" \"${ForgeTemplate.jarFile.absolutePath}\"")
+                println("\"$runtime\" -jar \"${file.absolutePath}\" \"${SimpleRPC.jarFile.absolutePath}\"")
                 Runtime.getRuntime()
-                    .exec("\"$runtime\" -jar \"${file.absolutePath}\" \"${ForgeTemplate.jarFile.absolutePath}\"")
+                    .exec("\"$runtime\" -jar \"${file.absolutePath}\" \"${SimpleRPC.jarFile.absolutePath}\"")
             } catch (e: Throwable) {
                 e.printStackTrace()
             }

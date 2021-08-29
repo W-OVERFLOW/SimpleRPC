@@ -1,8 +1,8 @@
-package net.wyvest.template.utils
+package net.wyvest.simplerpc.utils
 
 import com.google.gson.JsonObject
 import com.google.gson.JsonParser
-import net.wyvest.template.ForgeTemplate
+import net.wyvest.simplerpc.SimpleRPC
 import org.apache.http.HttpRequest
 import org.apache.http.HttpResponse
 import org.apache.http.HttpVersion
@@ -19,10 +19,9 @@ import java.util.*
  * https://github.com/Skytils/SkytilsMod/blob/1.x/LICENSE.md
  */
 object APIUtil {
-    private val parser = JsonParser()
 
     private val builder: HttpClientBuilder =
-        HttpClients.custom().setUserAgent("${ForgeTemplate.NAME}/${ForgeTemplate.VERSION}")
+        HttpClients.custom().setUserAgent("${SimpleRPC.NAME}/${SimpleRPC.VERSION}")
             .addInterceptorFirst { request: HttpRequest, _: HttpContext? ->
                 if (!request.containsHeader("Pragma")) request.addHeader("Pragma", "no-cache")
                 if (!request.containsHeader("Cache-Control")) request.addHeader("Cache-Control", "no-cache")
@@ -36,7 +35,7 @@ object APIUtil {
             val response: HttpResponse = client.execute(request)
             val entity = response.entity
             if (response.statusLine.statusCode == 200) {
-                return parser.parse(EntityUtils.toString(entity)).asJsonObject
+                return JsonParser.parseString(EntityUtils.toString(entity)).asJsonObject
             } else {
                 if (urlString.startsWithAny(
                         "https://api.ashcon.app/mojang/v2/user/",
@@ -48,14 +47,14 @@ object APIUtil {
                         scanner.useDelimiter("\\Z")
                         val error = scanner.next()
                         if (error.startsWith("{")) {
-                            return parser.parse(error).asJsonObject
+                            return JsonParser.parseString(error).asJsonObject
                         }
                     }
                 }
             }
         } catch (ex: Throwable) {
             ex.printStackTrace()
-            ForgeTemplate.sendMessage("§cAn error has occured whilst fetching a resource. See logs for more details.")
+            SimpleRPC.sendMessage("§cAn error has occured whilst fetching a resource. See logs for more details.")
         } finally {
             client.close()
         }
