@@ -5,7 +5,7 @@ plugins {
     id "org.jetbrains.kotlin.jvm" version "1.5.30"
 }
 
-version = "1.0.0"
+version = "1.0.1"
 group = "net.wyvest"
 archivesBaseName = "SimpleRPC"
 
@@ -41,7 +41,7 @@ dependencies {
     implementation ('xyz.matthewtgm:RequisiteLaunchwrapper:1.1')
     implementation ('gg.essential:loader-launchwrapper:1.1.0')
     provided 'gg.essential:essential-1.8.9-forge:1300'
-    include ('com.github.Wyvest:KDiscordIPC:1afa380307') {
+    include ('com.github.cbyrneee:KDiscordIPC:ca421698f2') {
         transitive = false
     }
     include('com.google.code.gson:gson:2.8.8')

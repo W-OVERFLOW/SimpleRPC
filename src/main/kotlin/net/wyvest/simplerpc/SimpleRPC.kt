@@ -33,7 +33,7 @@ import kotlin.math.floor
 object SimpleRPC {
     private var disconnectedHypixel = false
     const val NAME = "SimpleRPC"
-    const val VERSION = "1.0.0"
+    const val VERSION = "1.0.1"
     const val ID = "simplerpc"
     val mc: Minecraft
         get() = Minecraft.getMinecraft()
