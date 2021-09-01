@@ -11,7 +11,6 @@ import net.minecraftforge.common.MinecraftForge.EVENT_BUS
 import net.minecraftforge.fml.common.Mod
 import net.minecraftforge.fml.common.event.FMLInitializationEvent
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent
-import net.minecraftforge.fml.common.eventhandler.EventPriority
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
 import net.minecraftforge.fml.common.gameevent.TickEvent
 import net.minecraftforge.fml.common.network.FMLNetworkEvent
@@ -100,6 +99,7 @@ object SimpleRPC {
     @Mod.EventHandler
     fun onFMLInitialization(event: FMLInitializationEvent) {
         RPCConfig.preload()
+        RPCConfig.lastToggled = RPCConfig.toggled
         SimpleRPCCommand.register()
         Updater.update()
         EVENT_BUS.register(this)
@@ -113,7 +113,6 @@ object SimpleRPC {
                 }
                 startTimestamp = startTime
             }
-
             ipc.connect()
             timer.start()
         }

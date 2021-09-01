@@ -10,14 +10,17 @@ import net.wyvest.simplerpc.SimpleRPC.mc
 import net.wyvest.simplerpc.gui.DownloadConfirmGui
 import net.wyvest.simplerpc.utils.Updater
 import java.io.File
+import kotlin.properties.Delegates
 
 @Suppress("unused")
 object RPCConfig : Vigilant(File(SimpleRPC.modDir, "${SimpleRPC.ID}.toml"), NAME) {
 
+    var lastToggled by Delegates.notNull<Boolean>()
+
     @Property(
         type = PropertyType.SWITCH,
         name = "Toggle Mod",
-        description = "Toggle the mod.\nCan be buggy and sometimes needs a restart to take effect.",
+        description = "Toggle the mod.\nRequires a restart to take effect.",
         category = "General"
     )
     var toggled = true
@@ -94,20 +97,10 @@ object RPCConfig : Vigilant(File(SimpleRPC.modDir, "${SimpleRPC.ID}.toml"), NAME
     init {
         initialize()
         registerListener("toggled") {
-                isToggled: Boolean ->
+                toggled: Boolean ->
             run {
-                if (isToggled) {
-                    try {
-                        SimpleRPC.ipc.connect()
-                    } catch (e: Exception) {
-                        EssentialAPI.getNotifications().push("SimpleRPC", "There was an error trying to reconnect to the IPC. Please restart your game for your changes to take effect.")
-                    }
-                } else {
-                    try {
-                        SimpleRPC.ipc.disconnect()
-                    } catch (e: Exception) {
-                        EssentialAPI.getNotifications().push("SimpleRPC", "There was an error trying to disconnect to the IPC. Please restart your game for your changes to take effect.")
-                    }
+                if (toggled != lastToggled) {
+                    EssentialAPI.getNotifications().push("SimpleRPC", "Successfully toggled. Please restart your game for it to take effect.")
                 }
             }
         }
