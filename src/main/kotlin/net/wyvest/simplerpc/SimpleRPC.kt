@@ -3,6 +3,7 @@ package net.wyvest.simplerpc
 import dev.cbyrne.kdiscordipc.DiscordIPC
 import dev.cbyrne.kdiscordipc.presence.presence
 import gg.essential.api.EssentialAPI
+import io.github.dediamondpro.hycord.features.discord.RichPresence
 import io.github.dediamondpro.hycord.options.Settings
 import net.minecraft.client.Minecraft
 import net.minecraft.util.EnumChatFormatting
@@ -10,6 +11,7 @@ import net.minecraftforge.common.MinecraftForge.EVENT_BUS
 import net.minecraftforge.fml.common.Mod
 import net.minecraftforge.fml.common.event.FMLInitializationEvent
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent
+import net.minecraftforge.fml.common.eventhandler.EventPriority
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
 import net.minecraftforge.fml.common.gameevent.TickEvent
 import net.minecraftforge.fml.common.network.FMLNetworkEvent
@@ -20,8 +22,8 @@ import xyz.matthewtgm.requisite.util.ChatHelper
 import xyz.matthewtgm.requisite.util.ForgeHelper
 import java.awt.event.ActionListener
 import java.io.File
+import java.time.Instant
 import javax.swing.Timer
-import kotlin.math.floor
 
 
 @Mod(
@@ -33,7 +35,7 @@ import kotlin.math.floor
 object SimpleRPC {
     private var disconnectedHypixel = false
     const val NAME = "SimpleRPC"
-    const val VERSION = "1.0.1"
+    const val VERSION = "1.1.0"
     const val ID = "simplerpc"
     val mc: Minecraft
         get() = Minecraft.getMinecraft()
@@ -46,26 +48,24 @@ object SimpleRPC {
     val modDir = File(File(File(mc.mcDataDir, "config"), "Wyvest"), NAME)
     private val regex = Regex("§[a-z0-9]")
     val ipc = DiscordIPC("862536466793103411")
-    private var secondsPassed = 0
+    private var startTime = Instant.now().epochSecond
     private var timerTask = ActionListener {
-        secondsPassed += 1
         ipc.presence = presence {
             state = "Playing Minecraft 1.8.9"
-            details = if (RPCConfig.showDetails) {
-                val newDetails = when (RPCConfig.details) {
-                    0 -> calculateTime()
-                    1 -> if (mc.currentServerData == null) {
+            if (RPCConfig.showDetails) {
+                details = when (RPCConfig.details) {
+                    0 -> if (mc.currentServerData == null) {
                         null
                     } else {
                         "Playing on ${mc.currentServerData.serverIP}"
                     }
-                    2 -> if (mc.thePlayer == null) {
+                    1 -> if (mc.thePlayer == null) {
                         null
                     } else {
                         "Playing as ${mc.thePlayer.name}"
                     }
-                    3 -> "Holding ${getCurrentItem()}"
-                    4 -> if (mc.netHandler == null) {
+                    2 -> "Holding ${getCurrentItem()}"
+                    3 -> if (mc.netHandler == null) {
                         null
                     } else {
                         "Fighting ${
@@ -78,20 +78,13 @@ object SimpleRPC {
                     }
                     else -> null
                 }
-                if ((newDetails == null) || (newDetails.length >= 128)) {
-                    null
-                } else {
-                    newDetails
-                }
-            } else {
-                null
             }
             if (RPCConfig.showImage) {
                 largeImageKey = "grass_side"
-                largeImageText = "Powered by SimpleRPC!"
-            } else {
-                largeImageKey = null
-                largeImageText = null
+                largeImageText = "Powered by SimpleRPC by W-OVERFLOW"
+            }
+            if (RPCConfig.showTime) {
+                startTimestamp = startTime
             }
         }
     }
@@ -114,45 +107,32 @@ object SimpleRPC {
         if (RPCConfig.toggled) {
             ipc.presence = presence {
                 state = "Playing Minecraft 1.8.9"
-                details = "00:00:00 elapsed."
                 if (RPCConfig.showImage) {
                     largeImageKey = "grass_side"
                     largeImageText = "Powered by SimpleRPC!"
-                } else {
-                    largeImageKey = null
-                    largeImageText = null
                 }
+                startTimestamp = startTime
             }
 
             ipc.connect()
             timer.start()
         }
-        EssentialAPI.getShutdownHookUtil().register {
-            //we don't need to disconnect because somehow the IPC already disconnects
-            println("Shutting down IPC and timer task...")
-            try {
-                ipc.disconnect()
-            } catch (_: Exception) {
-                println("The Discord IPC failed to shut down, this is likely due to the IPC already being stopped.")
-            }
-            try {
-                timer.stop()
-            } catch (_: Exception) {
-                println("The timer failed to shut down, this is likely due to the timer already being stopped.")
-            }
-        }
     }
 
     @SubscribeEvent
-    fun onServerJoin(e: TickEvent.ClientTickEvent) {
+    fun onTick(e: TickEvent.ClientTickEvent) {
         if (e.phase == TickEvent.Phase.START) {
-            if (EssentialAPI.getMinecraftUtil().isHypixel() && hycordDetected) {
-                if (Settings.enableRP && !disconnectedHypixel) {
-                    try {
-                        ipc.disconnect()
-                        disconnectedHypixel = true
-                    } catch (e: Exception) {
-                        EssentialAPI.getNotifications().push("SimpleRPC", "There was a problem trying to disable SimpleRPC IPC.")
+            if (hycordDetected) {
+                if (Settings.enableRP) {
+                    if (RichPresence.enabled) {
+                        if (!disconnectedHypixel && RPCConfig.hycordDetect) {
+                            try {
+                                ipc.disconnect()
+                                disconnectedHypixel = true
+                            } catch (e: Exception) {
+                                EssentialAPI.getNotifications().push("SimpleRPC", "There was a problem trying to disable SimpleRPC IPC.")
+                            }
+                        }
                     }
                 }
             }
@@ -161,7 +141,7 @@ object SimpleRPC {
 
     @SubscribeEvent
     fun onServerLeave(e: FMLNetworkEvent.ClientDisconnectionFromServerEvent) {
-        if (disconnectedHypixel && hycordDetected) {
+        if (disconnectedHypixel && hycordDetected && RPCConfig.hycordDetect) {
             try {
                 ipc.connect()
                 disconnectedHypixel = false
@@ -180,17 +160,5 @@ object SimpleRPC {
             }
         }
         return "nothing"
-    }
-
-    private fun calculateTime(): String {
-        val hours = floor((secondsPassed / 3600).toFloat()).toInt()
-        val minutes = floor(((secondsPassed - hours * 3600) / 60).toFloat()).toInt()
-        val seconds = secondsPassed - hours * 3600 - minutes * 60
-        return "${String.format("%02d", hours)}:${String.format("%02d", minutes)}:${
-            String.format(
-                "%02d",
-                seconds
-            )
-        } elapsed"
     }
 }

@@ -24,11 +24,19 @@ object RPCConfig : Vigilant(File(SimpleRPC.modDir, "${SimpleRPC.ID}.toml"), NAME
 
     @Property(
         type = PropertyType.SWITCH,
-        name = "Automatically Turn Off Mod When HyCord",
+        name = "Automatically Turn Off Mod When HyCord Detected",
         description = "Automatically turn off SimpleRPC when HyCord is detected.",
         category = "General"
     )
     var hycordDetect = true
+
+    @Property(
+        type = PropertyType.SWITCH,
+        name = "Retain SimpleRPC RPC Text With HyCord",
+        description = "Retain the same state, details, and time elapsed of the RPC in SimpleRPC when using HyCord.",
+        category = "General"
+    )
+    var keep = true
 
     @Property(
         type = PropertyType.SWITCH,
@@ -43,7 +51,7 @@ object RPCConfig : Vigilant(File(SimpleRPC.modDir, "${SimpleRPC.ID}.toml"), NAME
         name = "Select Details",
         description = "Select the type of detail for the RPC.",
         category = "General",
-        options = ["Time Elapsed", "Current Server", "Current User", "Current Item Held", "Current Amount of Players"]
+        options = ["Current Server", "Current User", "Current Item Held", "Current Amount of Players"]
     )
     var details = 0
 
@@ -54,6 +62,14 @@ object RPCConfig : Vigilant(File(SimpleRPC.modDir, "${SimpleRPC.ID}.toml"), NAME
         category = "General"
     )
     var showImage = true
+
+    @Property(
+        type = PropertyType.SWITCH,
+        name = "Show Time Elapsed",
+        description = "Show the time elapsed while playing Minecraft.",
+        category = "General"
+    )
+    var showTime = true
 
     @Property(
         type = PropertyType.SWITCH,

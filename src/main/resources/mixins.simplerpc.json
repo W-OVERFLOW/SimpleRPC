@@ -1,0 +1,10 @@
+{
+  "compatibilityLevel": "JAVA_8",
+  "minVersion": "0.7",
+  "package": "net.wyvest.simplerpc.mixin",
+  "refmap": "mixins.simplerpc.refmap.json",
+  "mixins": [
+    "MixinRichPresence"
+  ],
+  "verbose": true
+}

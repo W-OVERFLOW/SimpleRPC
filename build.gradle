@@ -3,9 +3,10 @@ plugins {
     id "com.github.johnrengelman.shadow" version "6.1.0"
     id "net.minecraftforge.gradle.forge" version "86b2392"
     id "org.jetbrains.kotlin.jvm" version "1.5.30"
+    id 'org.spongepowered.mixin' version 'd5f9873'
 }
 
-version = "1.0.1"
+version = "1.1.0"
 group = "net.wyvest"
 archivesBaseName = "SimpleRPC"
 
@@ -19,6 +20,7 @@ minecraft {
     makeObfSourceJar = false
     clientJvmArgs += '-Dfml.coreMods.load=net.wyvest.simplerpc.tweaker.SimpleRPCLoadingPlugin'
     clientRunArgs += '--tweakClass net.wyvest.requisiteessentialloader.RequisiteEssentialTweaker'
+    clientRunArgs += '--mixin mixins.simplerpc.json'
 }
 
 configurations {
@@ -37,13 +39,14 @@ repositories {
 dependencies {
     // Libraries
     provided 'xyz.matthewtgm:Requisite:1.1.1'
-    include 'com.github.W-OVERFLOW:RequisiteEssentialLoader:b9b55008f0'
+    include 'com.github.W-OVERFLOW:RequisiteEssentialLoader:7a4eb4eeb7'
     implementation ('xyz.matthewtgm:RequisiteLaunchwrapper:1.1')
-    implementation ('gg.essential:loader-launchwrapper:1.1.1')
-    provided 'gg.essential:essential-1.8.9-forge:1300'
-    include ('com.github.cbyrneee:KDiscordIPC:ca421698f2') {
+    implementation ('gg.essential:loader-launchwrapper:1.1.0')
+    provided 'gg.essential:essential-1.8.9-forge:1328'
+    include ('com.github.cbyrneee:KDiscordIPC:155dc128bc') {
         transitive = false
     }
+    annotationProcessor 'org.spongepowered:mixin:0.7.11-SNAPSHOT'
     include('com.google.code.gson:gson:2.8.8')
     include('com.kohlschutter.junixsocket:junixsocket-core:2.4.0')
 }
@@ -54,6 +57,7 @@ jar {
             'FMLCorePlugin': 'net.wyvest.simplerpc.tweaker.SimpleRPCLoadingPlugin',
             'FMLCorePluginContainsFMLMod': true,
             'ForceLoadAsMod': true,
+            'MixinConfigs': 'mixins.simplerpc.json',
             'TweakClass': 'net.wyvest.requisiteessentialloader.RequisiteEssentialTweaker',
             'TweakOrder': '0'
     )
@@ -114,6 +118,18 @@ shadowJar {
 // This forces the build task to run shadowJar after
 tasks.reobfJar.dependsOn(tasks.shadowJar)
 
+mixin {
+    disableRefMapWarning = true
+    defaultObfuscationEnv searge
+    add sourceSets.main, "mixins.simplerpc.refmap.json"
+}
+
+reobf {
+    shadowJar {
+        classpath = sourceSets.main.compileClasspath
+    }
+}
+
 compileKotlin {
     kotlinOptions {
         jvmTarget = "1.8"
@@ -131,5 +147,7 @@ sourceSets {
     dummy
     main {
         compileClasspath += dummy.output
+        ext.refMap = "mixins.simplerpc.refmap.json"
+        output.resourcesDir = file("${buildDir}/classes/kotlin/main")
     }
 }
