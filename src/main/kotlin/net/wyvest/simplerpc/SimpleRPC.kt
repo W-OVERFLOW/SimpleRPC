@@ -34,7 +34,7 @@ import javax.swing.Timer
 object SimpleRPC {
     private var disconnectedHypixel = false
     const val NAME = "SimpleRPC"
-    const val VERSION = "1.1.0"
+    const val VERSION = "1.2.0"
     const val ID = "simplerpc"
     val mc: Minecraft
         get() = Minecraft.getMinecraft()
@@ -89,6 +89,10 @@ object SimpleRPC {
     }
     private var timer = Timer(1000, timerTask)
     private var hycordDetected = false
+    private var sccDetected = false
+    private val canConnect
+        get() = if (RPCConfig.sccDetect) {
+        !sccDetected} else {true}
 
     @Mod.EventHandler
     private fun onFMLPreInitialization(event: FMLPreInitializationEvent) {
@@ -103,17 +107,22 @@ object SimpleRPC {
         SimpleRPCCommand.register()
         Updater.update()
         EVENT_BUS.register(this)
+        sccDetected = ForgeHelper.isModLoaded("skyclientcosmetics")
         hycordDetected = ForgeHelper.isModLoaded("hycord")
         if (RPCConfig.toggled) {
             ipc.presence = presence {
                 state = "Playing Minecraft 1.8.9"
                 if (RPCConfig.showImage) {
                     largeImageKey = "grass_side"
-                    largeImageText = "Powered by SimpleRPC!"
+                    largeImageText = "Powered by SimpleRPC by W-OVERFLOW"
                 }
-                startTimestamp = startTime
+                if (RPCConfig.showTime) {
+                    startTimestamp = startTime
+                }
             }
-            ipc.connect()
+            if (canConnect) {
+                ipc.connect()
+            }
             timer.start()
         }
     }
@@ -126,7 +135,9 @@ object SimpleRPC {
                     if (RichPresence.enabled) {
                         if (!disconnectedHypixel && RPCConfig.hycordDetect) {
                             try {
-                                ipc.disconnect()
+                                if (canConnect) {
+                                    ipc.disconnect()
+                                }
                                 disconnectedHypixel = true
                             } catch (e: Exception) {
                                 EssentialAPI.getNotifications().push("SimpleRPC", "There was a problem trying to disable SimpleRPC IPC.")
@@ -142,7 +153,9 @@ object SimpleRPC {
     fun onServerLeave(e: FMLNetworkEvent.ClientDisconnectionFromServerEvent) {
         if (disconnectedHypixel && hycordDetected && RPCConfig.hycordDetect) {
             try {
-                ipc.connect()
+                if (canConnect) {
+                    ipc.connect()
+                }
                 disconnectedHypixel = false
             } catch (e: Exception) {
                 EssentialAPI.getNotifications().push("SimpleRPC", "There was a problem trying to enable SimpleRPC IPC.")

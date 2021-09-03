@@ -4,7 +4,8 @@
   "package": "net.wyvest.simplerpc.mixin",
   "refmap": "mixins.simplerpc.refmap.json",
   "mixins": [
-    "MixinRichPresence"
+    "MixinRichPresence",
+    "MixinRPC"
   ],
   "verbose": true
 }

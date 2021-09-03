@@ -6,7 +6,7 @@ plugins {
     id 'org.spongepowered.mixin' version 'd5f9873'
 }
 
-version = "1.1.0"
+version = "1.2.0"
 group = "net.wyvest"
 archivesBaseName = "SimpleRPC"
 
@@ -93,7 +93,7 @@ shadowJar {
     configurations = [project.configurations.include]
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 
-    relocate("com.google", "kdiscordipc.google")
+    relocate("com", "kdiscordipc")
     exclude 'LICENSE.md'
     exclude 'pack.mcmeta'
     exclude 'dummyThing'

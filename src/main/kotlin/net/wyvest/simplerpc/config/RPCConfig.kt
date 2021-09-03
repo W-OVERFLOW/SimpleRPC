@@ -35,11 +35,59 @@ object RPCConfig : Vigilant(File(SimpleRPC.modDir, "${SimpleRPC.ID}.toml"), NAME
 
     @Property(
         type = PropertyType.SWITCH,
-        name = "Retain SimpleRPC RPC Text With HyCord",
-        description = "Retain the same state, details, and time elapsed of the RPC in SimpleRPC when using HyCord.",
+        name = "Automatically Turn Off Mod When SCC Detected",
+        description = "Automatically turn off SimpleRPC when Skyclient Cosmetics is detected.",
+        category = "General"
+    )
+    var sccDetect = true
+
+    @Property(
+        type = PropertyType.SWITCH,
+        name = "Retain SimpleRPC RPC Text",
+        description = "Retain the same state, details, and time elapsed of the RPC in SimpleRPC when using other Discord Rich Presence mods.",
         category = "General"
     )
     var keep = true
+
+    @Property(
+        type = PropertyType.SWITCH,
+        name = "Retain in HyCord",
+        description = "Retain the SimpleRPC RPC text while using HyCord's RPC.",
+        category = "General"
+    )
+    var hyCordRetain = true
+
+    @Property(
+        type = PropertyType.SWITCH,
+        name = "Retain in SCC",
+        description = "Retain the SimpleRPC RPC text while using Skyclient Cosmetics' RPC.",
+        category = "General"
+    )
+    var sccRetain = true
+
+    @Property(
+        type = PropertyType.SWITCH,
+        name = "Retain State",
+        description = "Retain the details of SimpleRPC while using other Discord Rich Presence mods.",
+        category = "General"
+    )
+    var retainState = true
+
+    @Property(
+        type = PropertyType.SWITCH,
+        name = "Retain Details",
+        description = "Retain the details of SimpleRPC while using other Discord Rich Presence mods.",
+        category = "General"
+    )
+    var retainDetails = true
+
+    @Property(
+        type = PropertyType.SWITCH,
+        name = "Retain Time Elapsed",
+        description = "Retain the time elapsed while using other Discord Rich Presence mods.\nDoes not apply with Skyclient Cosmetics (SCC).",
+        category = "General"
+    )
+    var retainTime = true
 
     @Property(
         type = PropertyType.SWITCH,
@@ -96,6 +144,13 @@ object RPCConfig : Vigilant(File(SimpleRPC.modDir, "${SimpleRPC.ID}.toml"), NAME
 
     init {
         initialize()
+        listOf(
+            "hyCordRetain",
+            "sccRetain",
+            "retainState",
+            "retainDetails",
+            "retainTime"
+        ).forEach { propertyName -> addDependency(propertyName, "keep") }
         registerListener("toggled") {
                 toggled: Boolean ->
             run {
