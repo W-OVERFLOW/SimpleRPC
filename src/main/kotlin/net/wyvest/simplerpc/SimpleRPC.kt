@@ -6,8 +6,8 @@ import gg.essential.api.EssentialAPI
 import io.github.dediamondpro.hycord.features.discord.RichPresence
 import io.github.dediamondpro.hycord.options.Settings
 import net.minecraft.client.Minecraft
-import net.minecraft.util.EnumChatFormatting
 import net.minecraftforge.common.MinecraftForge.EVENT_BUS
+import net.minecraftforge.fml.common.Loader
 import net.minecraftforge.fml.common.Mod
 import net.minecraftforge.fml.common.event.FMLInitializationEvent
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent
@@ -16,9 +16,7 @@ import net.minecraftforge.fml.common.gameevent.TickEvent
 import net.minecraftforge.fml.common.network.FMLNetworkEvent
 import net.wyvest.simplerpc.commands.SimpleRPCCommand
 import net.wyvest.simplerpc.config.RPCConfig
-import net.wyvest.simplerpc.utils.Updater
-import xyz.matthewtgm.requisite.util.ChatHelper
-import xyz.matthewtgm.requisite.util.ForgeHelper
+import net.wyvest.simplerpc.updater.Updater
 import java.awt.event.ActionListener
 import java.io.File
 import java.time.Instant
@@ -34,17 +32,13 @@ import javax.swing.Timer
 object SimpleRPC {
     private var disconnectedHypixel = false
     const val NAME = "SimpleRPC"
-    const val VERSION = "1.2.0"
+    const val VERSION = "1.3.0"
     const val ID = "simplerpc"
     val mc: Minecraft
         get() = Minecraft.getMinecraft()
 
-    fun sendMessage(message: String?) {
-        ChatHelper.sendMessage(EnumChatFormatting.DARK_PURPLE.toString() + "[$NAME] ", message)
-    }
-
     lateinit var jarFile: File
-    val modDir = File(File(File(mc.mcDataDir, "config"), "Wyvest"), NAME)
+    val modDir = File(File(mc.mcDataDir, "W-OVERFLOW"), NAME)
     private val regex = Regex("§[a-z0-9]")
     val ipc = DiscordIPC("862536466793103411")
     private var startTime = Instant.now().epochSecond
@@ -107,8 +101,8 @@ object SimpleRPC {
         SimpleRPCCommand.register()
         Updater.update()
         EVENT_BUS.register(this)
-        sccDetected = ForgeHelper.isModLoaded("skyclientcosmetics")
-        hycordDetected = ForgeHelper.isModLoaded("hycord")
+        sccDetected = Loader.isModLoaded("skyclientcosmetics")
+        hycordDetected = Loader.isModLoaded("hycord")
         if (RPCConfig.toggled) {
             ipc.presence = presence {
                 state = "Playing Minecraft 1.8.9"
@@ -121,7 +115,11 @@ object SimpleRPC {
                 }
             }
             if (canConnect) {
-                ipc.connect()
+                try {
+                    ipc.connect()
+                } catch (e: Throwable) {
+                    e.printStackTrace()
+                }
             }
             timer.start()
         }
@@ -136,7 +134,11 @@ object SimpleRPC {
                         if (!disconnectedHypixel && RPCConfig.hycordDetect) {
                             try {
                                 if (canConnect) {
-                                    ipc.disconnect()
+                                    try {
+                                        ipc.disconnect()
+                                    } catch (e: Throwable) {
+                                        e.printStackTrace()
+                                    }
                                 }
                                 disconnectedHypixel = true
                             } catch (e: Exception) {
@@ -154,7 +156,11 @@ object SimpleRPC {
         if (disconnectedHypixel && hycordDetected && RPCConfig.hycordDetect) {
             try {
                 if (canConnect) {
-                    ipc.connect()
+                    try {
+                        ipc.connect()
+                    } catch (e: Throwable) {
+                        e.printStackTrace()
+                    }
                 }
                 disconnectedHypixel = false
             } catch (e: Exception) {

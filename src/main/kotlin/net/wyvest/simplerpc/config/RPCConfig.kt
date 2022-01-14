@@ -6,9 +6,8 @@ import gg.essential.vigilance.data.Property
 import gg.essential.vigilance.data.PropertyType
 import net.wyvest.simplerpc.SimpleRPC
 import net.wyvest.simplerpc.SimpleRPC.NAME
-import net.wyvest.simplerpc.SimpleRPC.mc
-import net.wyvest.simplerpc.gui.DownloadConfirmGui
-import net.wyvest.simplerpc.utils.Updater
+import net.wyvest.simplerpc.updater.DownloadGui
+import net.wyvest.simplerpc.updater.Updater
 import java.io.File
 import kotlin.properties.Delegates
 
@@ -138,7 +137,7 @@ object RPCConfig : Vigilant(File(SimpleRPC.modDir, "${SimpleRPC.ID}.toml"), NAME
     )
     fun update() {
         if (Updater.shouldUpdate) EssentialAPI.getGuiUtil()
-            .openScreen(DownloadConfirmGui(mc.currentScreen)) else EssentialAPI.getNotifications()
+            .openScreen(DownloadGui()) else EssentialAPI.getNotifications()
             .push(NAME, "No update had been detected at startup, and thus the update GUI has not been shown.")
     }
 
