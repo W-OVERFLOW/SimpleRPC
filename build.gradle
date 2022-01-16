@@ -50,7 +50,6 @@ dependencies {
 jar {
     manifest.attributes(
             'ModSide': 'CLIENT',
-            'FMLCorePluginContainsFMLMod': true,
             'ForceLoadAsMod': true,
             'MixinConfigs': 'mixins.simplerpc.json',
             'TweakClass': 'gg.essential.loader.stage0.EssentialSetupTweaker',
